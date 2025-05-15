@@ -1,4 +1,93 @@
-import jsonimport requestsfrom urllib.parse import urlparsedef get_domains(pastebin_url): """ Recupera il contenuto del Pastebin con i domini. """ try: response = requests.get(pastebin_url) response.raise_for_status() domains = response.text.strip().split('\n') domains = [domain.strip().replace('\r', '') for domain in return domains except requests.RequestException as e: print(f"Errore durante il recupero dei domini: {e}") return []def extract_full_domain(domain, site_key): """ Estrae il dominio completo da un URL con https:// e www. per T mentre per gli altri solo con https://. """ parsed_url = urlparse(domain) scheme = parsed_url.scheme if parsed_url.scheme else 'https' netloc = parsed_url.netloc or parsed_url.path if site_key in ['Tantifilm', 'StreamingWatch']: if not netloc.startswith('www.'): netloc = 'www.' + netloc return f"https://{netloc}" else: return f"https://{netloc}"
-def check_redirect(domain, site_key): """ Verifica se un dominio fa un redirect e restituisce il dominio """ if not domain.startswith(('http://', 'https://')): domain = 'http://' + domain try: response = requests.get(domain, allow_redirects=True) final_url = response.url final_domain = extract_full_domain(final_url, site_key) return domain, final_domain except requests.RequestException as e: return domain, f"Error: {str(e)}"def update_json_file(): """ Aggiorna il file config.json con i domini aggiornati. """ try: with open('config.json', 'r', encoding='utf-8') as file: data = json.load(file) except FileNotFoundError: print("Errore: Il file config.json non è stato trovato.") return except json.JSONDecodeError: print("Errore: Il file config.json non è un JSON valido.") return streamingcommunity_url = 'https://pastebin.com/raw/KgQ4jTy6' streamingcommunity_domains = get_domains(streamingcommunity_ur general_pastebin_url = 'https://pastebin.com/raw/E8WAhekV' general_domains = get_domains(general_pastebin_url) if not general_domains or not streamingcommunity_domains:
-print("Lista dei domini vuota. Controlla i link di Pastebi return site_mapping = { 'StreamingCommunity': streamingcommunity_domains[0], 'Filmpertutti': general_domains[1], 'Tantifilm': general_domains[2], 'LordChannel': general_domains[3], 'StreamingWatch': general_domains[4], 'CB01': general_domains[5], 'DDLStream': general_domains[6], 'Guardaserie': general_domains[7], 'GuardaHD': general_domains[8], 'AnimeWorld': general_domains[9], 'SkyStreaming': general_domains[10], 'DaddyLiveHD': general_domains[11], } for site_key, domain_url in site_mapping.items(): if site_key in data['Siti']: original, final_domain = check_redirect(domain_url, si if "Error" in final_domain: print(f"Errore nel redirect di {original}: {final_ continue data['Siti'][site_key]['url'] = final_domain print(f"Aggiornato {site_key}: {final_domain}") try: with open('config.json', 'w', encoding='utf-8') as file: json.dump(data, file, indent=4, ensure_ascii=False) print("File config.json aggiornato con successo!") except Exception as e: print(f"Errore durante il salvataggio del file JSON: {e}")
-if __name__ == '__main__': update_json_file()
+{
+    "Siti": {
+        "StreamingCommunity": {
+            "url": "https://streamingunity.to",
+            "SC_ForwardProxy": "0",
+            "SC_PROXY": "0",
+            "VX_ForwardProxy": "0",
+            "VX_PROXY": "0",
+            "enabled": "1"
+        },
+        "Filmpertutti": {
+            "url": "https://filmpertutti.motorcycles",
+            "enabled": "1"
+        },
+        "Tantifilm": {
+            "url": "https://www.tanti.bond",
+            "TF_ForwardProxy": "0",
+            "TF_PROXY": "1",
+            "enabled": "1"
+        },
+        "Mysterius": {
+            "enabled": "0"
+        },
+        "LordChannel": {
+            "url": "https://lordchannel.net",
+            "enabled": "1"
+        },
+        "StreamingWatch": {
+            "url": "https://www.streamingwatch.org",
+            "enabled": "1"
+        },
+        "CB01": {
+            "url": "https://cb01net.icu",
+            "CB_PROXY": "1",
+            "CB_ForwardProxy": "0",
+            "MX_ForwardProxy": "0",
+            "MX_PROXY": "0",
+            "enabled": "1"
+        },
+        "DDLStream": {
+            "url": "https://ddlstreamitaly.co",
+            "cookies": {
+                "ips4_device_key": "e76de2d09214c678fa18e317e1aab74b",
+                "ips4_IPSSessionFront": "a43ab7f014e10d61c58412c436b2018b",
+                "ips4_member_id": "4030150",
+                "ips4_login_key": "5cb83aeddd61ee9dc9d8727726cabc94"
+            },
+            "enabled": "1"
+        },
+        "Guardaserie": {
+            "url": "https://guardaserietv.art",
+            "enabled": "1",
+            "GS_ForwardProxy": "0",
+            "GS_PROXY": "1"
+        },
+        "GuardaHD": {
+            "url": "https://guardahd.stream",
+            "enabled": "1",
+            "GH_ForwardProxy": "0",
+            "GH_PROXY": "1"
+        },
+        "Onlineserietv": {
+            "domain": "com",
+            "enabled": "1",
+            "OST_ForwardProxy": "0",
+            "OST_PROXY": "0"
+        },
+        "AnimeWorld": {
+            "url": "https://www.animeworld.ac",
+            "enabled": "1",
+            "AW_ForwardProxy": "0",
+            "AW_PROXY": "1"
+        },
+        "SkyStreaming": {
+            "url": "https://skystreaming.email",
+            "enabled": "1"
+        },
+        "DaddyLiveHD": {
+            "url": "https://daddylive.dad",
+            "enabled": "1"
+        }
+    },
+    "General": {
+        "load_env": "0",
+        "HOST": "0.0.0.0",
+        "PORT": "8080",
+        "Name": "MammAnna",
+        "Icon": "🍕️",
+        "Public_Instance": "0",
+        "Remote_Instance": "1",
+        "Global_Proxy": "0"
+    }
+}
